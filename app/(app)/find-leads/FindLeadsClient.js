@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState } from "react";
 import PageHeader from "@/components/PageHeader";
 import SearchForm from "@/components/SearchForm";
@@ -11,14 +12,14 @@ import { useToast } from "@/components/Toast";
 
 const MAX_BATCHES = 200; // Safety stop so a stuck job cannot loop forever.
 
-export default function FindLeadsClient({ usage, provider, savedKeywords, defaults }) {
+export default function FindLeadsClient({ provider, savedKeywords, defaults }) {
+  const router = useRouter();
   const toast = useToast();
   const [search, setSearch] = useState(null);
   const [percent, setPercent] = useState(0);
   const [running, setRunning] = useState(false);
   const [leads, setLeads] = useState([]);
-  const [quota, setQuota] = useState(usage);
-  const [prefill, setPrefill] = useState({ ...defaults, keyword: "" });
+  const [prefill, setPrefill] = useState(defaults);
   const cancelled = useRef(false);
 
   const loadLeads = useCallback(async (searchId) => {
@@ -62,7 +63,8 @@ export default function FindLeadsClient({ usage, provider, savedKeywords, defaul
     try {
       const data = await apiRequest("/api/search", { method: "POST", body: input });
       setSearch(data.search);
-      setQuota(data.usage);
+      // Refreshes the daily quota badge rendered by the app shell.
+      router.refresh();
       if (data.search.resultsFound === 0) {
         setPercent(100);
         toast.info("No results were returned for that keyword. Try a broader keyword.");
@@ -81,11 +83,6 @@ export default function FindLeadsClient({ usage, provider, savedKeywords, defaul
       <PageHeader
         title="Find leads"
         subtitle="Enter any keyword. Add a location to focus the search, or leave it empty to search globally."
-        actions={
-          <span className="badge text-bg-light border align-self-center">
-            Today&apos;s searches: {quota.used} / {quota.limit}
-          </span>
-        }
       />
 
       {!provider.configured ? (

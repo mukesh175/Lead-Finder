@@ -39,7 +39,7 @@ export default function SearchForm({ defaults = {}, disabled = false, onSubmit }
           />
         </div>
 
-        <div className="col-12 col-lg-4">
+        <div className="col-12 col-lg-3">
           <label className="form-label fw-semibold" htmlFor="location">
             Location <span className="lf-muted fw-normal">(optional)</span>
           </label>
@@ -54,7 +54,7 @@ export default function SearchForm({ defaults = {}, disabled = false, onSubmit }
           />
         </div>
 
-        <div className="col-6 col-lg-1">
+        <div className="col-6 col-lg-2">
           <label className="form-label fw-semibold" htmlFor="limit">
             Leads
           </label>

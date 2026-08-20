@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { dailyUsage } from "@/lib/leads/pipeline";
@@ -7,7 +8,11 @@ export const dynamic = "force-dynamic";
 
 export default async function AppLayout({ children }) {
   const user = await getCurrentUser();
-  if (!user) redirect("/login");
+  if (!user) {
+    // Next-Url carries the path (plus query) the visitor actually asked for.
+    const requested = (await headers()).get("next-url");
+    redirect(requested ? `/login?next=${encodeURIComponent(requested)}` : "/login");
+  }
   const usage = await dailyUsage(user.id);
 
   return (

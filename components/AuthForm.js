@@ -6,7 +6,7 @@ import { useState } from "react";
 import { apiRequest } from "@/lib/clientApi";
 import { useToast } from "./Toast";
 
-export default function AuthForm({ mode }) {
+export default function AuthForm({ mode, next }) {
   const isRegister = mode === "register";
   const router = useRouter();
   const toast = useToast();
@@ -26,7 +26,7 @@ export default function AuthForm({ mode }) {
         body: isRegister ? form : { email: form.email, password: form.password },
       });
       toast.success(isRegister ? "Account created." : "Welcome back.");
-      router.push("/dashboard");
+      router.push(next || "/dashboard");
       router.refresh();
     } catch (err) {
       setError(err.message);
@@ -34,6 +34,8 @@ export default function AuthForm({ mode }) {
       setBusy(false);
     }
   };
+
+  const suffix = next ? `?next=${encodeURIComponent(next)}` : "";
 
   return (
     <div className="d-flex align-items-center justify-content-center min-vh-100 p-3">
@@ -113,11 +115,11 @@ export default function AuthForm({ mode }) {
           <p className="text-center lf-muted small mt-4 mb-0">
             {isRegister ? (
               <>
-                Already have an account? <Link href="/login">Sign in</Link>
+                Already have an account? <Link href={`/login${suffix}`}>Sign in</Link>
               </>
             ) : (
               <>
-                New to LeadFinder? <Link href="/register">Create an account</Link>
+                New to LeadFinder? <Link href={`/register${suffix}`}>Create an account</Link>
               </>
             )}
           </p>
