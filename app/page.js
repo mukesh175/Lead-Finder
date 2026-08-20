@@ -66,18 +66,26 @@ export default async function LandingPage() {
             </Link>
           </div>
 
-          <div className="lf-card p-3 mt-5 text-start">
-            <div className="row g-2 align-items-end">
+          {/* Static preview of the real search form on /find-leads. */}
+          <div className="lf-card p-3 p-md-4 mt-5 text-start" aria-hidden="true">
+            <div className="row g-3 align-items-end">
               <div className="col-12 col-md-5">
                 <label className="form-label small lf-muted mb-1">Keyword</label>
-                <div className="form-control bg-light">Shopify developer</div>
+                <div className="form-control">Shopify developer</div>
               </div>
-              <div className="col-8 col-md-4">
+              <div className="col-12 col-md-3">
                 <label className="form-label small lf-muted mb-1">Location (optional)</label>
-                <div className="form-control bg-light">USA</div>
+                <div className="form-control">USA</div>
               </div>
-              <div className="col-4 col-md-3">
-                <span className="btn btn-primary w-100 disabled">Find Leads</span>
+              <div className="col-6 col-md-2">
+                <label className="form-label small lf-muted mb-1">Leads</label>
+                <div className="form-control d-flex justify-content-between align-items-center">
+                  <span>50</span>
+                  <span className="lf-muted small">▾</span>
+                </div>
+              </div>
+              <div className="col-6 col-md-2">
+                <span className="btn btn-primary w-100">Find Leads</span>
               </div>
             </div>
           </div>
