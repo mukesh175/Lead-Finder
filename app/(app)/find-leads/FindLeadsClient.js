@@ -12,7 +12,7 @@ import { useToast } from "@/components/Toast";
 
 const MAX_BATCHES = 200; // Safety stop so a stuck job cannot loop forever.
 
-export default function FindLeadsClient({ provider, savedKeywords, defaults }) {
+export default function FindLeadsClient({ provider, budget, savedKeywords, defaults }) {
   const router = useRouter();
   const toast = useToast();
   const [search, setSearch] = useState(null);
@@ -21,6 +21,7 @@ export default function FindLeadsClient({ provider, savedKeywords, defaults }) {
   const [leads, setLeads] = useState([]);
   const [prefill, setPrefill] = useState(defaults);
   const cancelled = useRef(false);
+  const budgetSpent = Boolean(budget && budget.remaining === 0);
 
   const loadLeads = useCallback(async (searchId) => {
     try {
@@ -63,7 +64,7 @@ export default function FindLeadsClient({ provider, savedKeywords, defaults }) {
     try {
       const data = await apiRequest("/api/search", { method: "POST", body: input });
       setSearch(data.search);
-      // Refreshes the daily quota badge rendered by the app shell.
+      // Refreshes the daily quota badge and the free-tier meter.
       router.refresh();
       if (data.search.resultsFound === 0) {
         setPercent(100);
@@ -91,6 +92,28 @@ export default function FindLeadsClient({ provider, savedKeywords, defaults }) {
           provider keys in your environment, or run with <code>SEARCH_PROVIDER=mock</code> during
           development.
         </div>
+      ) : budget ? (
+        <div className={`alert ${budget.remaining === 0 ? "alert-danger" : "alert-light border"}`}>
+          <div className="d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div>
+              <strong>Free tier:</strong> {budget.used} / {budget.limit} search API calls used today
+              {budget.remaining > 0 ? (
+                <span className="lf-muted">
+                  {" "}
+                  - about {budget.resultsRemaining} more leads available before the quota resets.
+                </span>
+              ) : (
+                <span> - searching is paused until the quota resets ({budget.resetsAt}).</span>
+              )}
+            </div>
+            <div className="progress" style={{ width: 160, height: 8 }}>
+              <div
+                className={`progress-bar ${budget.remaining === 0 ? "bg-danger" : ""}`}
+                style={{ width: `${Math.min(100, (budget.used / budget.limit) * 100)}%` }}
+              />
+            </div>
+          </div>
+        </div>
       ) : provider.name === "mock" ? (
         <div className="alert alert-info">
           Running with the <strong>mock search provider</strong>. Results are generated development
@@ -99,7 +122,13 @@ export default function FindLeadsClient({ provider, savedKeywords, defaults }) {
         </div>
       ) : null}
 
-      <SearchForm defaults={prefill} disabled={running} onSubmit={start} key={prefill.keyword} />
+      <SearchForm
+        defaults={prefill}
+        disabled={running || budgetSpent}
+        busyLabel={running ? "Searching..." : "Quota reached"}
+        onSubmit={start}
+        key={prefill.keyword}
+      />
 
       {savedKeywords.length > 0 ? (
         <div className="mt-3 d-flex flex-wrap gap-2 align-items-center">

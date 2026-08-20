@@ -4,7 +4,7 @@ import { useState } from "react";
 
 const LIMITS = [10, 25, 50, 100];
 
-export default function SearchForm({ defaults = {}, disabled = false, onSubmit }) {
+export default function SearchForm({ defaults = {}, disabled = false, busyLabel = "Searching...", onSubmit }) {
   const [keyword, setKeyword] = useState(defaults.keyword || "");
   const [location, setLocation] = useState(defaults.location || "");
   const [limit, setLimit] = useState(defaults.limit || 25);
@@ -75,7 +75,7 @@ export default function SearchForm({ defaults = {}, disabled = false, onSubmit }
 
         <div className="col-6 col-lg-2 d-flex align-items-end">
           <button type="submit" className="btn btn-primary btn-lg w-100" disabled={disabled}>
-            {disabled ? "Searching..." : "Find Leads"}
+            {disabled ? busyLabel : "Find Leads"}
           </button>
         </div>
       </div>

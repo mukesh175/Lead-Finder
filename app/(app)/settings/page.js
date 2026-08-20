@@ -1,5 +1,5 @@
 import { requireUser } from "@/lib/auth";
-import { providerStatus } from "@/lib/search/searchProvider";
+import { providerStatus, providerBudget } from "@/lib/search/searchProvider";
 import { verificationStatus } from "@/lib/email/verifier";
 import { limits, scoreWeights } from "@/lib/config";
 import { dailyUsage } from "@/lib/leads/pipeline";
@@ -22,6 +22,7 @@ export default async function SettingsPage() {
       limits={limits}
       scoreWeights={scoreWeights}
       usage={await dailyUsage(user.id)}
+      budget={await providerBudget()}
     />
   );
 }

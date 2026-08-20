@@ -15,7 +15,7 @@ function Status({ connected, label }) {
   );
 }
 
-export default function SettingsClient({ user, integrations, limits, scoreWeights, usage }) {
+export default function SettingsClient({ user, integrations, limits, scoreWeights, usage, budget }) {
   const toast = useToast();
   const [form, setForm] = useState(user);
   const [busy, setBusy] = useState(false);
@@ -138,6 +138,14 @@ export default function SettingsClient({ user, integrations, limits, scoreWeight
           <div className="lf-card p-3 p-lg-4 mb-3">
             <h2 className="h6 fw-semibold mb-3">Limits</h2>
             <ul className="list-unstyled small mb-0">
+              {budget ? (
+                <li className="d-flex justify-content-between py-1">
+                  <span className="lf-muted">Search API calls today (free tier)</span>
+                  <strong className={budget.remaining === 0 ? "text-danger" : undefined}>
+                    {budget.used} / {budget.limit}
+                  </strong>
+                </li>
+              ) : null}
               <li className="d-flex justify-content-between py-1">
                 <span className="lf-muted">Searches per day</span>
                 <strong>
@@ -157,6 +165,12 @@ export default function SettingsClient({ user, integrations, limits, scoreWeight
                 <strong>{limits.fetchTimeoutMs} ms</strong>
               </li>
             </ul>
+            {budget ? (
+              <p className="lf-muted small mt-3 mb-0">
+                Searches are refused once the free-tier budget is spent; it resets at{" "}
+                {budget.resetsAt}.
+              </p>
+            ) : null}
           </div>
 
           <div className="lf-card p-3 p-lg-4">

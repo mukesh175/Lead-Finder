@@ -139,3 +139,16 @@ model LeadSource {
 
   @@index([leadId])
 }
+
+/// Tracks paid-quota consumption of an external search provider, counted in API
+/// calls (not searches) against the provider's own daily reset window.
+model ApiUsage {
+  id        String   @id @default(cuid())
+  provider  String
+  quotaDate String
+  calls     Int      @default(0)
+  updatedAt DateTime @updatedAt
+
+  @@unique([provider, quotaDate])
+  @@index([provider])
+}

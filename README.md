@@ -155,13 +155,37 @@ Categories: `80-100 Hot`, `60-79 Warm`, `40-59 Potential`, `0-39 Low`.
 
 ### Free-tier limits
 
-| Limit                  | Default | Env var                  |
-| ---------------------- | ------- | ------------------------ |
-| Searches per day       | 10      | `MAX_SEARCHES_PER_DAY`   |
-| Max results per search | 100     | `MAX_RESULTS_PER_SEARCH` |
-| Max pages per website  | 5       | `MAX_PAGES_PER_LEAD`     |
+| Limit                       | Default | Env var                    |
+| --------------------------- | ------- | -------------------------- |
+| Search API calls per day    | 100     | `SEARCH_DAILY_API_BUDGET`  |
+| Searches per day (per user) | 10      | `MAX_SEARCHES_PER_DAY`     |
+| Max results per search      | 100     | `MAX_RESULTS_PER_SEARCH`   |
+| Max pages per website       | 5       | `MAX_PAGES_PER_LEAD`       |
 
 Remaining quota is shown in the top bar and on the settings page.
+
+#### Staying inside the search provider's free tier
+
+Google's Custom Search JSON API bills per **API call**, and one call returns at
+most 10 results - so a 100-lead search costs 10 calls. The free tier is 100
+calls per day, which `SEARCH_DAILY_API_BUDGET` matches exactly.
+
+The budget is enforced, not advisory:
+
+- Calls are counted in the database against the provider's own quota day
+  (midnight Pacific for Google), so the count survives restarts and is shared
+  across serverless instances.
+- Every call is **reserved before the request is sent**, with a conditional
+  `UPDATE` - concurrent searches cannot both slip past the ceiling.
+- A search that would exceed the remaining budget is **trimmed** to what is
+  left; when nothing is left the search is **refused before it starts**
+  (`SEARCH_FREE_TIER_REACHED`), so no request reaches the provider.
+- The find-leads page and settings page show calls used, leads still available
+  today, and when the quota resets.
+
+With the defaults in place the app cannot generate a bill. Raising
+`SEARCH_DAILY_API_BUDGET` above your provider's free allowance is what opts you
+into paid usage.
 
 ---
 

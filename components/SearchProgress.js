@@ -45,6 +45,10 @@ export default function SearchProgress({ search, percent }) {
         </div>
       ) : null}
 
+      {stats.notice ? (
+        <div className="alert alert-warning mt-3 mb-0 py-2 small">{stats.notice}</div>
+      ) : null}
+
       {search.status === "COMPLETED" ? (
         <ul className="list-unstyled small mt-3 mb-0 d-flex flex-wrap gap-3">
           <li>{total} results discovered</li>
