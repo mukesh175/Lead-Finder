@@ -140,7 +140,9 @@ export default function SettingsClient({ user, integrations, limits, scoreWeight
             <ul className="list-unstyled small mb-0">
               {budget ? (
                 <li className="d-flex justify-content-between py-1">
-                  <span className="lf-muted">Search API calls today (free tier)</span>
+                  <span className="lf-muted">
+                    Search API calls this {budget.period} (free tier)
+                  </span>
                   <strong className={budget.remaining === 0 ? "text-danger" : undefined}>
                     {budget.used} / {budget.limit}
                   </strong>
@@ -167,7 +169,7 @@ export default function SettingsClient({ user, integrations, limits, scoreWeight
             </ul>
             {budget ? (
               <p className="lf-muted small mt-3 mb-0">
-                Searches are refused once the free-tier budget is spent; it resets at{" "}
+                Searches are refused once the free-tier allowance is spent; it resets at{" "}
                 {budget.resetsAt}.
               </p>
             ) : null}

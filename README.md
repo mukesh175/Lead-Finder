@@ -63,8 +63,8 @@ cp .env.example .env
 | ---------------------------- | ----------------------- | ------------------------------------------------------------------ |
 | `DATABASE_URL`               | yes                     | Neon PostgreSQL connection string.                                  |
 | `NEXTAUTH_SECRET`            | yes                     | Secret used to sign session cookies (`openssl rand -base64 32`).    |
-| `SEARCH_PROVIDER`            | yes                     | `mock` (offline development data) or `google`.                      |
-| `SEARCH_API_KEY`             | only for `google`       | Google Programmable Search API key.                                 |
+| `SEARCH_PROVIDER`            | yes                     | `mock`, `tavily`, `serper` or `google` - see below.                 |
+| `SEARCH_API_KEY`             | for live search         | API key for the selected provider.                                  |
 | `SEARCH_ENGINE_ID`           | only for `google`       | Programmable Search engine id (`cx`).                               |
 | `EMAIL_VERIFICATION_API_KEY` | no                      | Enables real email verification. Without it, emails show *Not checked*. |
 
@@ -124,6 +124,23 @@ keyword (+ optional location, result count)
    -> dashboard, filters, CSV export
 ```
 
+### Choosing a search provider
+
+| `SEARCH_PROVIDER` | Free allowance          | Card required | Notes                                              |
+| ----------------- | ----------------------- | ------------- | -------------------------------------------------- |
+| `mock`            | unlimited, offline      | no            | Generated data. Full pipeline, zero API cost.      |
+| `tavily`          | 1,000 searches / month  | no            | Recurring monthly. Max 20 results per search.      |
+| `serper`          | 2,500 credits           | no            | Google results. 1 credit per 10 results.           |
+| `google`          | 100 calls / day         | no            | **Closed to new customers**; ends 2027-01-01.      |
+
+Google's Custom Search JSON API no longer accepts new users, and its
+"search the entire web" setting can no longer be enabled on new engines - a
+site-restricted engine cannot do open-ended lead discovery. `tavily` or
+`serper` are the working choices for a new deployment.
+
+Switching provider is one environment variable. Nothing else in the pipeline -
+crawling, extraction, scoring, deduplication, storage or UI - changes.
+
 ### Search jobs
 
 A search never runs as one long serverless request:
@@ -155,26 +172,28 @@ Categories: `80-100 Hot`, `60-79 Warm`, `40-59 Potential`, `0-39 Low`.
 
 ### Free-tier limits
 
-| Limit                       | Default | Env var                    |
-| --------------------------- | ------- | -------------------------- |
-| Search API calls per day    | 100     | `SEARCH_DAILY_API_BUDGET`  |
-| Searches per day (per user) | 10      | `MAX_SEARCHES_PER_DAY`     |
-| Max results per search      | 100     | `MAX_RESULTS_PER_SEARCH`   |
-| Max pages per website       | 5       | `MAX_PAGES_PER_LEAD`       |
+| Limit                       | Default             | Env var                    |
+| --------------------------- | ------------------- | -------------------------- |
+| Search API calls            | the provider's free tier | `SEARCH_API_BUDGET`   |
+| Searches per day (per user) | 10                  | `MAX_SEARCHES_PER_DAY`     |
+| Max results per search      | 100                 | `MAX_RESULTS_PER_SEARCH`   |
+| Max pages per website       | 5                   | `MAX_PAGES_PER_LEAD`       |
 
 Remaining quota is shown in the top bar and on the settings page.
 
 #### Staying inside the search provider's free tier
 
-Google's Custom Search JSON API bills per **API call**, and one call returns at
-most 10 results - so a 100-lead search costs 10 calls. The free tier is 100
-calls per day, which `SEARCH_DAILY_API_BUDGET` matches exactly.
+Providers bill per **API call**, not per lead - Serper and Google return at
+most 10 results per call, Tavily returns up to 20 for a single credit. Each
+provider's default budget in this app is set to exactly the free allowance its
+vendor grants, and every call is counted in the unit that vendor charges.
 
 The budget is enforced, not advisory:
 
-- Calls are counted in the database against the provider's own quota day
-  (midnight Pacific for Google), so the count survives restarts and is shared
-  across serverless instances.
+- Calls are counted in the database against the provider's own reset window
+  (daily for Google, monthly for Tavily and Serper), so the count survives
+  restarts and is shared across serverless instances. Each provider has its
+  own counter.
 - Every call is **reserved before the request is sent**, with a conditional
   `UPDATE` - concurrent searches cannot both slip past the ceiling.
 - A search that would exceed the remaining budget is **trimmed** to what is
@@ -184,8 +203,8 @@ The budget is enforced, not advisory:
   today, and when the quota resets.
 
 With the defaults in place the app cannot generate a bill. Raising
-`SEARCH_DAILY_API_BUDGET` above your provider's free allowance is what opts you
-into paid usage.
+`SEARCH_API_BUDGET` above your provider's free allowance is what opts you into
+paid usage.
 
 ---
 
@@ -250,7 +269,8 @@ app/
 components/               Sidebar, Topbar, SearchForm, LeadTable, Filters, ...
 lib/
   prisma.js auth.js api.js config.js rateLimit.js
-  search/    searchProvider.js googleProvider.js mockProvider.js
+  search/    searchProvider.js mockProvider.js tavilyProvider.js
+             serperProvider.js googleProvider.js quota.js
   email/     extractor.js verifier.js
   leads/     pipeline.js scorer.js dedupe.js query.js csv.js serialize.js
   crawler/   crawler.js safeFetch.js parse.js
@@ -262,5 +282,9 @@ prisma/schema.prisma
 
 `lib/search/searchProvider.js` exposes `search({ keyword, location, limit })` and
 returns `{ title, url, snippet, displayLink }`. To add a provider, implement that
-interface, register it in the `providers` map and set `SEARCH_PROVIDER`.
+interface, register it in the `providers` map and set `SEARCH_PROVIDER`. A
+provider that costs money also declares `consumesQuota`, `defaultBudget`,
+`maxResultsPerSearch` and `callsFor(resultCount)` so the spend guard can price
+it correctly, and reserves each call with `reserveCalls(this, n)` before making
+the request.
 `lib/email/verifier.js` works the same way for email verification.

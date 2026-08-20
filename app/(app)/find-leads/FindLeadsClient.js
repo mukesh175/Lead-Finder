@@ -96,14 +96,15 @@ export default function FindLeadsClient({ provider, budget, savedKeywords, defau
         <div className={`alert ${budget.remaining === 0 ? "alert-danger" : "alert-light border"}`}>
           <div className="d-flex flex-wrap justify-content-between align-items-center gap-2">
             <div>
-              <strong>Free tier:</strong> {budget.used} / {budget.limit} search API calls used today
+              <strong>{provider.label} free tier:</strong> {budget.used} / {budget.limit} search API
+              calls used this {budget.period}
               {budget.remaining > 0 ? (
                 <span className="lf-muted">
                   {" "}
-                  - about {budget.resultsRemaining} more leads available before the quota resets.
+                  - about {budget.resultsRemaining} more leads available before it resets.
                 </span>
               ) : (
-                <span> - searching is paused until the quota resets ({budget.resetsAt}).</span>
+                <span> - searching is paused until the allowance resets ({budget.resetsAt}).</span>
               )}
             </div>
             <div className="progress" style={{ width: 160, height: 8 }}>
