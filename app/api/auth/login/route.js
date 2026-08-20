@@ -1,6 +1,11 @@
 import { prisma } from "@/lib/prisma";
 import { handler, ok, fail } from "@/lib/api";
-import { verifyPassword, createSession, assertSameOrigin } from "@/lib/auth";
+import {
+  verifyPassword,
+  createSession,
+  assertSameOrigin,
+  assertAuthConfigured,
+} from "@/lib/auth";
 import { loginSchema, parseOrThrow } from "@/lib/validation/schemas";
 import { rateLimit, clientKey } from "@/lib/rateLimit";
 
@@ -8,6 +13,7 @@ export const runtime = "nodejs";
 
 export const POST = handler(async (request) => {
   assertSameOrigin(request);
+  assertAuthConfigured();
   rateLimit(clientKey(request, "login"), { max: 10, windowMs: 60_000 });
 
   const body = await request.json().catch(() => ({}));

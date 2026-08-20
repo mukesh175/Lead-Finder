@@ -1,6 +1,11 @@
 import { prisma } from "@/lib/prisma";
 import { handler, ok, fail } from "@/lib/api";
-import { hashPassword, createSession, assertSameOrigin } from "@/lib/auth";
+import {
+  hashPassword,
+  createSession,
+  assertSameOrigin,
+  assertAuthConfigured,
+} from "@/lib/auth";
 import { registerSchema, parseOrThrow } from "@/lib/validation/schemas";
 import { rateLimit, clientKey } from "@/lib/rateLimit";
 
@@ -8,6 +13,9 @@ export const runtime = "nodejs";
 
 export const POST = handler(async (request) => {
   assertSameOrigin(request);
+  // Checked up front: creating the account and then failing to sign the session
+  // would leave an unusable, un-retryable account behind.
+  assertAuthConfigured();
   rateLimit(clientKey(request, "register"), { max: 5, windowMs: 60_000 });
 
   const body = await request.json().catch(() => ({}));

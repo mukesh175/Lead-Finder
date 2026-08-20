@@ -6,7 +6,7 @@ import { useState } from "react";
 import { apiRequest } from "@/lib/clientApi";
 import { useToast } from "./Toast";
 
-export default function AuthForm({ mode, next }) {
+export default function AuthForm({ mode, next, configured = true }) {
   const isRegister = mode === "register";
   const router = useRouter();
   const toast = useToast();
@@ -53,6 +53,13 @@ export default function AuthForm({ mode, next }) {
               ? "Start turning keywords into a lead database."
               : "Welcome back. Enter your details to continue."}
           </p>
+
+          {!configured ? (
+            <div className="alert alert-warning small">
+              <strong>Server not configured.</strong> Set <code>NEXTAUTH_SECRET</code> (at least 16
+              characters) in your environment and restart the server. See <code>.env.example</code>.
+            </div>
+          ) : null}
 
           <form onSubmit={submit} noValidate>
             {isRegister ? (
@@ -107,7 +114,7 @@ export default function AuthForm({ mode, next }) {
 
             {error ? <div className="alert alert-danger py-2">{error}</div> : null}
 
-            <button className="btn btn-primary w-100" type="submit" disabled={busy}>
+            <button className="btn btn-primary w-100" type="submit" disabled={busy || !configured}>
               {busy ? "Please wait..." : isRegister ? "Create account" : "Sign in"}
             </button>
           </form>
