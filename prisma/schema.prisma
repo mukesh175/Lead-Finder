@@ -1,0 +1,141 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  REPLIED
+  QUALIFIED
+  CONVERTED
+  NOT_INTERESTED
+  ARCHIVED
+}
+
+enum SearchStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum EmailStatus {
+  valid
+  invalid
+  unknown
+  not_checked
+}
+
+model User {
+  id             String          @id @default(cuid())
+  email          String          @unique
+  name           String?
+  passwordHash   String
+  defaultLimit   Int             @default(25)
+  defaultLocation String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  searches       Search[]
+  leads          Lead[]
+  keywords       SearchKeyword[]
+}
+
+model Search {
+  id           String       @id @default(cuid())
+  keyword      String
+  location     String?
+  resultLimit  Int          @default(25)
+  resultsFound Int          @default(0)
+  processed    Int          @default(0)
+  status       SearchStatus @default(PENDING)
+  error        String?
+  stats        Json?
+  queue        Json?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  userId       String
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  leads        Lead[]
+
+  @@index([userId, createdAt])
+  @@index([keyword])
+  @@index([status])
+}
+
+model SearchKeyword {
+  id         String   @id @default(cuid())
+  keyword    String
+  location   String?
+  leadCount  Int      @default(0)
+  lastRunAt  DateTime?
+  createdAt  DateTime @default(now())
+
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, keyword])
+  @@index([userId])
+}
+
+model Lead {
+  id            String      @id @default(cuid())
+  name          String?
+  companyName   String?
+  website       String?
+  websiteKey    String?
+  email         String?
+  emailStatus   EmailStatus @default(not_checked)
+  phone         String?
+  location      String?
+  country       String?
+  city          String?
+  keyword       String
+  sourceUrl     String
+  sourceType    String      @default("search_result")
+  description   String?
+  contactPageUrl String?
+  linkedinUrl   String?
+  facebookUrl   String?
+  instagramUrl  String?
+  twitterUrl    String?
+  leadScore     Int         @default(0)
+  leadStatus    LeadStatus  @default(NEW)
+  dedupeKey     String
+  notes         String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  userId        String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  searchId      String?
+  search        Search?     @relation(fields: [searchId], references: [id], onDelete: SetNull)
+  sources       LeadSource[]
+
+  @@unique([userId, dedupeKey])
+  @@index([userId, createdAt])
+  @@index([userId, leadScore])
+  @@index([userId, leadStatus])
+  @@index([userId, keyword])
+  @@index([email])
+  @@index([websiteKey])
+}
+
+model LeadSource {
+  id         String   @id @default(cuid())
+  leadId     String
+  lead       Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  url        String
+  sourceType String
+  method     String
+  keyword    String?
+  createdAt  DateTime @default(now())
+
+  @@index([leadId])
+}
