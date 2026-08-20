@@ -199,8 +199,10 @@ The budget is enforced, not advisory:
 - A search that would exceed the remaining budget is **trimmed** to what is
   left; when nothing is left the search is **refused before it starts**
   (`SEARCH_FREE_TIER_REACHED`), so no request reaches the provider.
-- The find-leads page and settings page show calls used, leads still available
-  today, and when the quota resets.
+- The top bar carries a running "N leads left this month" counter on every
+  page, which drops as searches spend calls and turns amber then red as the
+  allowance runs down. The find-leads and settings pages show the underlying
+  call count and reset time.
 
 With the defaults in place the app cannot generate a bill. Raising
 `SEARCH_API_BUDGET` above your provider's free allowance is what opts you into

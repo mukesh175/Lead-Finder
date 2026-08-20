@@ -4,7 +4,7 @@ import { useState } from "react";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 
-export default function DashboardShell({ user, usage, children }) {
+export default function DashboardShell({ user, usage, budget, children }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -12,7 +12,12 @@ export default function DashboardShell({ user, usage, children }) {
       <Sidebar open={open} onNavigate={() => setOpen(false)} />
       {open ? <div className="lf-backdrop d-lg-none" onClick={() => setOpen(false)} /> : null}
       <div className="lf-main flex-grow-1 d-flex flex-column">
-        <Topbar user={user} usage={usage} onToggleSidebar={() => setOpen((v) => !v)} />
+        <Topbar
+          user={user}
+          usage={usage}
+          budget={budget}
+          onToggleSidebar={() => setOpen((v) => !v)}
+        />
         <main className="lf-content flex-grow-1">{children}</main>
       </div>
     </div>

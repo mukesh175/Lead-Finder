@@ -4,8 +4,9 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { apiRequest } from "@/lib/clientApi";
 import { useToast } from "./Toast";
+import LeadsRemaining from "./LeadsRemaining";
 
-export default function Topbar({ user, usage, onToggleSidebar }) {
+export default function Topbar({ user, usage, budget, onToggleSidebar }) {
   const router = useRouter();
   const toast = useToast();
   const [query, setQuery] = useState("");
@@ -51,8 +52,14 @@ export default function Topbar({ user, usage, onToggleSidebar }) {
         />
       </form>
 
-      <div className="ms-auto d-flex align-items-center gap-3">
-        <span className="badge text-bg-light border d-none d-md-inline" title="Daily search quota">
+      <div className="ms-auto d-flex align-items-center gap-2 gap-md-3">
+        <span className="d-none d-md-inline">
+          <LeadsRemaining budget={budget} />
+        </span>
+        <span className="d-inline d-md-none">
+          <LeadsRemaining budget={budget} compact />
+        </span>
+        <span className="badge text-bg-light border d-none d-lg-inline" title="Daily search quota">
           Today&apos;s searches: {usage?.used ?? 0} / {usage?.limit ?? 0}
         </span>
 
