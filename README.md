@@ -230,6 +230,14 @@ settings, and drop as they are spent. They are counted against the same spend
 guard as search calls, so they cannot overrun. A number that cannot be parsed
 is rejected locally without spending a credit.
 
+When a lookup fails, the reason is shown in the UI and logged to the server
+console as `[phone:<provider>] ...` - an invalid key, an unprocessable number,
+an exhausted allowance or an unexpected response shape. A request the provider
+rejects (400/401/403/422) returns its credit, since no lookup was performed.
+
+Note that Abstract issues a **separate API key per product**; a key copied from
+their email or IP product returns HTTP 401 here.
+
 Scope, stated plainly: these APIs confirm the number is correctly formatted,
 allocated to a real carrier, and whether it is mobile or landline. They cannot
 prove a person will answer. "Active line" means the line exists.

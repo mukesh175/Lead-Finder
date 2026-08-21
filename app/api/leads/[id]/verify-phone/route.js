@@ -38,6 +38,7 @@ export const POST = handler(async (request, { params }) => {
 
   return ok({
     lead: updated,
+    reason: result.reason || null,
     provider: { name: provider.name, configured: provider.configured },
     budget: await phoneBudget(),
   });

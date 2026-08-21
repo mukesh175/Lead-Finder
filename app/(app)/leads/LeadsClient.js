@@ -96,6 +96,8 @@ export default function LeadsClient({ keywords, initialFilters, phoneBudget }) {
       }));
       if (!data.provider.configured) {
         toast.info("No verification provider configured - status left as Not checked.");
+      } else if (data.reason) {
+        toast.error(data.reason);
       } else {
         toast.success(`Phone reported as ${data.lead.phoneStatus.replace("_", " ")}.`);
       }

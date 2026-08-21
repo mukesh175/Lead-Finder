@@ -39,6 +39,8 @@ export default function VerifyClient({ provider, budget: initialBudget }) {
       setHistory((current) => [{ ...data, id: `${Date.now()}` }, ...current].slice(0, 15));
       if (!data.provider.configured) {
         toast.info("No verification provider configured - set PHONE_VERIFICATION_API_KEY.");
+      } else if (data.result.reason) {
+        toast.error(data.result.reason);
       }
     } catch (error) {
       toast.error(error.message);
@@ -114,6 +116,11 @@ export default function VerifyClient({ provider, budget: initialBudget }) {
                       <span className={`badge text-bg-${TONES[entry.result.status] || "secondary"}`}>
                         {LABELS[entry.result.status] || entry.result.status}
                       </span>
+                      {entry.result.reason ? (
+                        <div className="lf-muted small mt-1" style={{ maxWidth: 460 }}>
+                          {entry.result.reason}
+                        </div>
+                      ) : null}
                     </td>
                     <td>{entry.result.lineType || <span className="lf-muted">—</span>}</td>
                     <td>{entry.result.carrier || <span className="lf-muted">—</span>}</td>
