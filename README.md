@@ -219,8 +219,13 @@ the provider supplies them. Two providers are supported, chosen with
 
 Abstract issues a **separate API key per product**, and each product has its
 own host. Take the key from the *Phone Intelligence* dashboard; a key from
-Email Reputation or IP Intelligence returns HTTP 401 here. The reader accepts
-both the grouped Phone Intelligence response and the older flat shape.
+Email Reputation or IP Intelligence returns HTTP 401 here.
+
+Providers rename and re-nest their response fields between versions, so the
+reader searches the response for the values it needs rather than depending on
+one fixed layout - `phone_validation.is_valid`, `validation.valid` and a flat
+`valid` are all understood. When validity genuinely cannot be found, the status
+stays `unknown` and the raw body is logged so the shape can be mapped.
 
 Lookups are **on demand** and never run during a search, because the free
 allowances are small. Three ways to spend one:
