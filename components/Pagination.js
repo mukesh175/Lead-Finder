@@ -1,5 +1,7 @@
 "use client";
 
+import { formatNumber } from "@/lib/format";
+
 const PAGE_SIZES = [25, 50, 100];
 
 export default function Pagination({ page, totalPages, total, pageSize, onPageChange, onPageSizeChange }) {
@@ -14,7 +16,7 @@ export default function Pagination({ page, totalPages, total, pageSize, onPageCh
   return (
     <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 p-3 border-top">
       <div className="lf-muted small">
-        Showing {firstRow}-{lastRow} of {total.toLocaleString()} leads
+        Showing {firstRow}-{lastRow} of {formatNumber(total)} leads
       </div>
 
       <div className="d-flex align-items-center gap-3">

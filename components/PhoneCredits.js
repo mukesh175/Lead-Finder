@@ -1,5 +1,7 @@
 "use client";
 
+import { formatNumber } from "@/lib/format";
+
 /** Remaining phone verification lookups on the provider's free allowance. */
 export default function PhoneCredits({ budget, className = "" }) {
   if (!budget) {
@@ -18,7 +20,7 @@ export default function PhoneCredits({ budget, className = "" }) {
       className={`badge text-bg-${tone}-subtle text-${tone}-emphasis border border-${tone}-subtle ${className}`}
       title={`${used} of ${limit} lookups used - resets at ${resetsAt}`}
     >
-      <strong>{remaining.toLocaleString()}</strong> verify credits left this {period}
+      <strong>{formatNumber(remaining)}</strong> verify credits left this {period}
     </span>
   );
 }

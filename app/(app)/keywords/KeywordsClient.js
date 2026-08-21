@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import PageHeader from "@/components/PageHeader";
 import EmptyState from "@/components/EmptyState";
+import LocalDate from "@/components/LocalDate";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { apiRequest } from "@/lib/clientApi";
 import { useToast } from "@/components/Toast";
@@ -131,7 +132,7 @@ export default function KeywordsClient() {
                     <td className="lf-muted">{keyword.location || "Global"}</td>
                     <td>{keyword.leadCount}</td>
                     <td className="lf-muted small">
-                      {keyword.lastRunAt ? new Date(keyword.lastRunAt).toLocaleDateString() : "Never"}
+                      {keyword.lastRunAt ? <LocalDate value={keyword.lastRunAt} /> : "Never"}
                     </td>
                     <td className="text-end text-nowrap">
                       <Link

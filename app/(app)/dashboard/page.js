@@ -6,6 +6,7 @@ import StatsCard from "@/components/StatsCard";
 import LeadCard from "@/components/LeadCard";
 import PageHeader from "@/components/PageHeader";
 import EmptyState from "@/components/EmptyState";
+import { formatNumber } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Dashboard · LeadFinder" };
@@ -44,18 +45,18 @@ export default async function DashboardPage() {
 
       <div className="row g-3 mb-4">
         <div className="col-12 col-sm-6 col-xl-3">
-          <StatsCard label="Total Leads" value={totalLeads.toLocaleString()} icon="☰" tone="primary" />
+          <StatsCard label="Total Leads" value={formatNumber(totalLeads)} icon="☰" tone="primary" />
         </div>
         <div className="col-12 col-sm-6 col-xl-3">
-          <StatsCard label="Hot Leads" value={hotLeads.toLocaleString()} icon="🔥" tone="danger" hint="Score 80+" />
+          <StatsCard label="Hot Leads" value={formatNumber(hotLeads)} icon="🔥" tone="danger" hint="Score 80+" />
         </div>
         <div className="col-12 col-sm-6 col-xl-3">
-          <StatsCard label="Emails Found" value={emailsFound.toLocaleString()} icon="📮" tone="info" hint="Publicly listed" />
+          <StatsCard label="Emails Found" value={formatNumber(emailsFound)} icon="📮" tone="info" hint="Publicly listed" />
         </div>
         <div className="col-12 col-sm-6 col-xl-3">
           <StatsCard
             label="Verified Emails"
-            value={verifiedEmails.toLocaleString()}
+            value={formatNumber(verifiedEmails)}
             icon="✅"
             tone="success"
             hint="Confirmed by a verification provider"

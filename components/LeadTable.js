@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import ScoreBadge from "./ScoreBadge";
+import LocalDate from "./LocalDate";
 import { EmailStatusBadge, PhoneStatusBadge, LEAD_STATUSES } from "./StatusBadge";
 
 const COLUMNS = [
@@ -159,7 +160,7 @@ export default function LeadTable({
                 </a>
               </td>
               <td className="lf-muted small text-nowrap">
-                {new Date(lead.createdAt).toLocaleDateString()}
+                <LocalDate value={lead.createdAt} />
               </td>
               <td className="text-end text-nowrap">
                 <Link href={`/leads/${lead.id}`} className="btn btn-sm btn-light me-1">

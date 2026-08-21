@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { dailyUsage } from "@/lib/leads/pipeline";
 import PageHeader from "@/components/PageHeader";
 import EmptyState from "@/components/EmptyState";
+import LocalDate from "@/components/LocalDate";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Search History · LeadFinder" };
@@ -83,7 +84,7 @@ export default async function SearchesPage({ searchParams }) {
                       </span>
                     </td>
                     <td className="lf-muted small text-nowrap">
-                      {new Date(search.createdAt).toLocaleString()}
+                      <LocalDate value={search.createdAt} withTime />
                     </td>
                     <td className="text-end text-nowrap">
                       <Link className="btn btn-sm btn-light me-1" href={`/leads?searchId=${search.id}`}>

@@ -7,6 +7,7 @@ import PageHeader from "@/components/PageHeader";
 import ScoreBadge from "@/components/ScoreBadge";
 import { EmailStatusBadge, PhoneStatusBadge, LEAD_STATUSES } from "@/components/StatusBadge";
 import ConfirmDialog from "@/components/ConfirmDialog";
+import LocalDate from "@/components/LocalDate";
 import { apiRequest } from "@/lib/clientApi";
 import { useToast } from "@/components/Toast";
 
@@ -202,7 +203,9 @@ export default function LeadDetailClient({ lead: initialLead }) {
                 {lead.sourceUrl}
               </a>
             </Row>
-            <Row label="Discovered">{new Date(lead.createdAt).toLocaleString()}</Row>
+            <Row label="Discovered">
+              <LocalDate value={lead.createdAt} withTime />
+            </Row>
             {socials.length > 0 ? (
               <Row label="Social Profiles">
                 <div className="d-flex flex-wrap gap-2">
@@ -252,7 +255,9 @@ export default function LeadDetailClient({ lead: initialLead }) {
                   <a href={source.url} target="_blank" rel="noopener noreferrer nofollow" className="text-break">
                     {source.url}
                   </a>
-                  <div className="lf-muted">{new Date(source.createdAt).toLocaleString()}</div>
+                  <div className="lf-muted">
+                    <LocalDate value={source.createdAt} withTime />
+                  </div>
                 </li>
               ))}
             </ul>

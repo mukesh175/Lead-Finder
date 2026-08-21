@@ -1,5 +1,7 @@
 "use client";
 
+import { formatNumber } from "@/lib/format";
+
 /**
  * Running count of how many leads the provider's free allowance can still
  * deliver. Shown on every page so the balance is visible before a search, and
@@ -21,7 +23,7 @@ export default function LeadsRemaining({ budget, compact = false }) {
   if (compact) {
     return (
       <span className={`badge text-bg-${tone}`} title={title}>
-        {resultsRemaining.toLocaleString()} leads left
+        {formatNumber(resultsRemaining)} leads left
       </span>
     );
   }
@@ -31,7 +33,7 @@ export default function LeadsRemaining({ budget, compact = false }) {
       className={`badge text-bg-${tone}-subtle text-${tone}-emphasis border border-${tone}-subtle`}
       title={title}
     >
-      <strong>{resultsRemaining.toLocaleString()}</strong> leads left {label}
+      <strong>{formatNumber(resultsRemaining)}</strong> leads left {label}
     </span>
   );
 }
