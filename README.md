@@ -182,6 +182,28 @@ Because the batch entry point is a plain function (`processBatch` in
 `lib/leads/pipeline.js`), the same job can later be driven by a background queue
 worker without touching the UI or the API contract.
 
+### Result quality
+
+Real search results are noisy: platform pages, page titles like "Homepage",
+dates that look like phone numbers. The pipeline filters these rather than
+storing them as prospect data.
+
+- **Platform pages** (Instagram, Facebook, LinkedIn, YouTube, Google Docs,
+  directories) are kept as leads but marked `social_profile`, not treated as
+  the prospect's own website. Their body text is never scanned for phone
+  numbers - only an explicit `tel:` link or structured data counts - because a
+  platform page is full of the platform's own ids and timestamps.
+- **Platform emails** (`support-in@google.com` on a YouTube page) are dropped.
+  Ordinary Gmail/Yahoo business addresses are kept: for many small businesses
+  that *is* the contact address.
+- **Phone false positives** are rejected: dates (`18.08.2026`, `29-2026-06`),
+  digit sequences (`0123456789`), repeated digits, 8-digit date-like runs and
+  14-15 digit ids. Numbers from a `tel:` link are trusted more than numbers
+  scraped out of body text.
+- **Generic titles** ("Homepage", "Instagram", "Google Docs", "Login") are not
+  stored as company names; the page falls back to the domain, or to the public
+  handle for a platform profile.
+
 ### Phone verification
 
 `lib/phone/verifier.js` mirrors the email verifier: `verifyPhone(phone)` returns

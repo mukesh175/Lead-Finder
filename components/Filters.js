@@ -115,6 +115,7 @@ export default function Filters({ value, keywords = [], onChange, onReset }) {
             <option value="any">All leads</option>
             <option value="intent_post">Asked for this service</option>
             <option value="website_analysis">Business website</option>
+            <option value="social_profile">Social profile</option>
             <option value="search_result">Search listing only</option>
           </select>
         </div>
