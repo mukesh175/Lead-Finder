@@ -211,10 +211,16 @@ storing them as prospect data.
 the provider supplies them. Two providers are supported, chosen with
 `PHONE_VERIFICATION_PROVIDER`:
 
-| Provider   | Free allowance     | Env value  |
-| ---------- | ------------------ | ---------- |
-| Abstract   | 250 lookups/month  | `abstract` |
-| Numverify  | 100 lookups/month  | `numverify`|
+| Provider                     | Free allowance    | Env value             |
+| ---------------------------- | ----------------- | --------------------- |
+| Abstract Phone Intelligence  | 250 lookups/month | `abstract`            |
+| Abstract Phone Validation    | legacy product    | `abstract_validation` |
+| Numverify                    | 100 lookups/month | `numverify`           |
+
+Abstract issues a **separate API key per product**, and each product has its
+own host. Take the key from the *Phone Intelligence* dashboard; a key from
+Email Reputation or IP Intelligence returns HTTP 401 here. The reader accepts
+both the grouped Phone Intelligence response and the older flat shape.
 
 Lookups are **on demand** and never run during a search, because the free
 allowances are small. Three ways to spend one:
@@ -234,9 +240,6 @@ When a lookup fails, the reason is shown in the UI and logged to the server
 console as `[phone:<provider>] ...` - an invalid key, an unprocessable number,
 an exhausted allowance or an unexpected response shape. A request the provider
 rejects (400/401/403/422) returns its credit, since no lookup was performed.
-
-Note that Abstract issues a **separate API key per product**; a key copied from
-their email or IP product returns HTTP 401 here.
 
 Scope, stated plainly: these APIs confirm the number is correctly formatted,
 allocated to a real carrier, and whether it is mobile or landline. They cannot
