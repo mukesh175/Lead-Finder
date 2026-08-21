@@ -18,6 +18,8 @@ const BASE_FILTERS = {
   minScore: "",
   hasEmail: "any",
   emailStatus: "any",
+  phoneStatus: "any",
+  sourceType: "any",
   leadStatus: "any",
   searchId: "",
   from: "",
@@ -89,7 +91,11 @@ export default function LeadsClient({ keywords, initialFilters }) {
         body: { ids: selected, action, leadStatus },
       });
       toast.success(
-        action === "delete" ? `${result.deleted} lead(s) deleted.` : `${result.updated} lead(s) updated.`
+        action === "delete"
+          ? `${result.deleted} lead(s) deleted.`
+          : action === "verify_phone"
+            ? `${result.checked} phone number(s) checked.`
+            : `${result.updated} lead(s) updated.`
       );
       setSelected([]);
       setConfirm(null);
@@ -180,6 +186,14 @@ export default function LeadsClient({ keywords, initialFilters }) {
               )
             )}
           </select>
+          <button
+            className="btn btn-sm btn-light"
+            onClick={() => runBulk("verify_phone")}
+            disabled={busy}
+            title="Checks each selected lead's number against the phone validation provider"
+          >
+            Check phones
+          </button>
           <button
             className="btn btn-sm btn-outline-danger ms-auto"
             onClick={() =>

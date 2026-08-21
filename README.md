@@ -10,14 +10,41 @@ through exactly the same code path.
 
 ---
 
+## Two ways to find leads
+
+**Businesses offering it** - companies and professionals who *provide* the
+service, discovered from their public websites. Good for partnerships,
+outreach lists and competitor research.
+
+**People asking for it** - public posts where someone says they *need* the
+service right now: freelance briefs, job ads, Reddit threads, forum questions,
+public hiring posts. Each lead stores the exact sentence that shows the need,
+plus a link to the original post, so you can reply where they asked.
+
+Sources for intent mode are selectable per search:
+
+| Group             | Sites                                                        |
+| ----------------- | ------------------------------------------------------------ |
+| Freelance portals | Upwork, Fiverr, Freelancer, PeoplePerHour, Guru, and others   |
+| Job boards        | Indeed, WeWorkRemotely, RemoteOK, Wellfound, Naukri, …        |
+| Reddit & forums   | Reddit, Quora, Hacker News, product community forums          |
+| LinkedIn & X      | Public hiring and looking-for posts                           |
+
+Intent leads often have no email or phone - the person posted on a platform,
+not on their own website. That is expected: the post link is the way to reach
+them, and no contact detail is ever invented to fill the gap.
+
 ## What LeadFinder does — and does not — do
 
 LeadFinder discovers **publicly available business and professional contact
 information**. It does **not** provide private information about individual
 search-engine users.
 
-- Search engines do not expose who searched for a keyword, and LeadFinder never
-  claims a person searched for anything unless the source itself shows that intent.
+- Search engines do not expose who searched for a keyword. Nobody can supply
+  the identity or email of a person who typed "shopify developer" into Google,
+  Bing, Yahoo or Facebook - that data is never published. Intent mode finds the
+  people who posted their need **in public**, and stores their own words as
+  proof; it never infers intent from a private search.
 - Every stored contact keeps the exact public **source URL** and the **method**
   used to obtain it (`search_result_metadata` or `public_website_page`).
 - Emails are never guessed or generated. If no public address is found, the field
@@ -155,6 +182,26 @@ Because the batch entry point is a plain function (`processBatch` in
 `lib/leads/pipeline.js`), the same job can later be driven by a background queue
 worker without touching the UI or the API contract.
 
+### Phone verification
+
+`lib/phone/verifier.js` mirrors the email verifier: `verifyPhone(phone)` returns
+`valid | invalid | unknown | not_checked`, with the carrier and line type when
+the provider supplies them. Two providers are supported, chosen with
+`PHONE_VERIFICATION_PROVIDER`:
+
+| Provider   | Free allowance     | Env value  |
+| ---------- | ------------------ | ---------- |
+| Abstract   | 250 lookups/month  | `abstract` |
+| Numverify  | 100 lookups/month  | `numverify`|
+
+Lookups are **on demand** - the "Check if active" button on a lead, or "Check
+phones" on selected rows - because the free allowances are small. They are
+counted against the same spend guard as search calls, so they cannot overrun.
+
+Scope, stated plainly: these APIs confirm the number is correctly formatted,
+allocated to a real carrier, and whether it is mobile or landline. They cannot
+prove a person will answer. "Active line" means the line exists.
+
 ### Lead scoring
 
 | Signal                        | Default weight | Env var                 |
@@ -166,6 +213,7 @@ worker without touching the UI or the API contract.
 | Location match                | +10            | `SCORE_LOCATION_MATCH`  |
 | Contact page found            | +5             | `SCORE_CONTACT_PAGE`    |
 | Business identified           | +10            | `SCORE_COMPANY`         |
+| Publicly asked for the service | +35           | `SCORE_INTENT_SIGNAL`   |
 | Verified on the source site   | +5             | `SCORE_RELEVANT_SOURCE` |
 
 Categories: `80-100 Hot`, `60-79 Warm`, `40-59 Potential`, `0-39 Low`.
@@ -274,6 +322,7 @@ lib/
   search/    searchProvider.js mockProvider.js tavilyProvider.js
              serperProvider.js googleProvider.js quota.js
   email/     extractor.js verifier.js
+  phone/     verifier.js
   leads/     pipeline.js scorer.js dedupe.js query.js csv.js serialize.js
   crawler/   crawler.js safeFetch.js parse.js
   validation/schemas.js

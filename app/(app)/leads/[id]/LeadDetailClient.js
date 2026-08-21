@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import PageHeader from "@/components/PageHeader";
 import ScoreBadge from "@/components/ScoreBadge";
-import { EmailStatusBadge, LEAD_STATUSES } from "@/components/StatusBadge";
+import { EmailStatusBadge, PhoneStatusBadge, LEAD_STATUSES } from "@/components/StatusBadge";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { apiRequest } from "@/lib/clientApi";
 import { useToast } from "@/components/Toast";
@@ -27,6 +27,7 @@ export default function LeadDetailClient({ lead: initialLead }) {
   const [lead, setLead] = useState(initialLead);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [verifying, setVerifying] = useState(false);
 
   const copy = async (value, label) => {
     if (!value) return;
@@ -45,6 +46,23 @@ export default function LeadDetailClient({ lead: initialLead }) {
       toast.success("Status updated.");
     } catch (error) {
       toast.error(error.message);
+    }
+  };
+
+  const checkPhone = async () => {
+    setVerifying(true);
+    try {
+      const data = await apiRequest(`/api/leads/${lead.id}/verify-phone`, { method: "POST" });
+      setLead((current) => ({ ...current, ...data.lead }));
+      if (!data.provider.configured) {
+        toast.info("No phone verification provider configured - status left as Not checked.");
+      } else {
+        toast.success(`Phone reported as ${data.lead.phoneStatus.replace("_", " ")}.`);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setVerifying(false);
     }
   };
 
@@ -71,8 +89,17 @@ export default function LeadDetailClient({ lead: initialLead }) {
   return (
     <>
       <PageHeader
-        title={lead.companyName || "Unknown company"}
-        subtitle={lead.description || "No public description found."}
+        title={
+          lead.companyName ||
+          (lead.sourceType === "intent_post"
+            ? lead.description || "Public request"
+            : "Unknown company")
+        }
+        subtitle={
+          lead.sourceType === "intent_post"
+            ? "Someone publicly asked for this service - reply on the original post."
+            : lead.description || "No public description found."
+        }
         actions={
           <>
             <Link href="/leads" className="btn btn-light">
@@ -96,7 +123,15 @@ export default function LeadDetailClient({ lead: initialLead }) {
       <div className="row g-3">
         <div className="col-12 col-lg-8">
           <div className="lf-card p-3 p-lg-4">
-            <Row label="Company Name">{lead.companyName || <span className="lf-muted">Not found</span>}</Row>
+            <Row label={lead.sourceType === "intent_post" ? "Posted by" : "Company Name"}>
+              {lead.companyName || (
+                <span className="lf-muted">
+                  {lead.sourceType === "intent_post"
+                    ? "Not published on the post"
+                    : "Not found"}
+                </span>
+              )}
+            </Row>
             <Row label="Contact Person">
               {lead.name || <span className="lf-muted">No publicly associated person found</span>}
             </Row>
@@ -126,8 +161,15 @@ export default function LeadDetailClient({ lead: initialLead }) {
               {lead.phone ? (
                 <span className="d-flex flex-wrap align-items-center gap-2">
                   <span>{lead.phone}</span>
+                  <PhoneStatusBadge status={lead.phoneStatus} lineType={lead.phoneLineType} />
+                  {lead.phoneCarrier ? (
+                    <span className="lf-muted small">{lead.phoneCarrier}</span>
+                  ) : null}
                   <button className="btn btn-sm btn-light" onClick={() => copy(lead.phone, "Phone")}>
                     Copy Phone
+                  </button>
+                  <button className="btn btn-sm btn-light" onClick={checkPhone} disabled={verifying}>
+                    {verifying ? "Checking..." : "Check if active"}
                   </button>
                 </span>
               ) : (
@@ -144,6 +186,14 @@ export default function LeadDetailClient({ lead: initialLead }) {
                 <span className="lf-muted">Not found</span>
               )}
             </Row>
+            {lead.intentQuote ? (
+              <Row label="What they asked for">
+                <blockquote className="mb-1 fst-italic">&ldquo;{lead.intentQuote}&rdquo;</blockquote>
+                <a href={lead.sourceUrl} target="_blank" rel="noopener noreferrer nofollow" className="small">
+                  Read the original post
+                </a>
+              </Row>
+            ) : null}
             <Row label="Keyword">{lead.keyword}</Row>
             <Row label="Source URL">
               <a href={lead.sourceUrl} target="_blank" rel="noopener noreferrer nofollow">

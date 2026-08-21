@@ -27,4 +27,16 @@ export function EmailStatusBadge({ status }) {
   );
 }
 
+export function PhoneStatusBadge({ status, lineType }) {
+  const label = EMAIL_LABELS[status] || "Not checked";
+  return (
+    <span
+      className={`badge text-bg-${EMAIL_TONES[status] || "secondary"}`}
+      title={lineType ? `Line type: ${lineType}` : undefined}
+    >
+      {status === "valid" ? "Active line" : label}
+    </span>
+  );
+}
+
 export const LEAD_STATUSES = Object.keys(TONES);

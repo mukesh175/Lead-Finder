@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { handler, ok, fail } from "@/lib/api";
 import { requireUser, assertSameOrigin } from "@/lib/auth";
 import { leadUpdateSchema, parseOrThrow } from "@/lib/validation/schemas";
+import { phoneDigits } from "@/lib/crawler/parse";
 
 export const runtime = "nodejs";
 
@@ -30,6 +31,12 @@ export const PATCH = handler(async (request, { params }) => {
   for (const [key, value] of Object.entries(data)) {
     if (value === undefined) continue;
     patch[key] = value === "" ? null : value;
+  }
+
+  // Keep the searchable digits copy in step with a manually edited number.
+  if ("phone" in patch) {
+    patch.phoneDigits = phoneDigits(patch.phone);
+    patch.phoneStatus = "not_checked";
   }
 
   const lead = await prisma.lead.update({ where: { id }, data: patch });

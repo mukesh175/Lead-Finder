@@ -20,6 +20,8 @@ export const POST = handler(async (request) => {
     keyword: input.keyword,
     location: input.location || null,
     limit: input.limit,
+    mode: input.mode,
+    sources: input.sources,
   });
 
   return ok({ search: serializeSearch(record), usage: await dailyUsage(user.id) });

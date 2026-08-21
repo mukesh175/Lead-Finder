@@ -31,6 +31,20 @@ enum EmailStatus {
   not_checked
 }
 
+enum PhoneStatus {
+  valid
+  invalid
+  unknown
+  not_checked
+}
+
+/// business = companies that PROVIDE the searched service.
+/// intent   = people publicly ASKING for it (posts, job ads, forum threads).
+enum SearchMode {
+  business
+  intent
+}
+
 model User {
   id             String          @id @default(cuid())
   email          String          @unique
@@ -51,6 +65,8 @@ model Search {
   keyword      String
   location     String?
   resultLimit  Int          @default(25)
+  mode         SearchMode   @default(business)
+  sources      String[]     @default([])
   resultsFound Int          @default(0)
   processed    Int          @default(0)
   status       SearchStatus @default(PENDING)
@@ -93,12 +109,21 @@ model Lead {
   email         String?
   emailStatus   EmailStatus @default(not_checked)
   phone         String?
+  /// Digits-only copy of `phone`, so a search for "9876543210" also matches
+  /// "+91 98765-43210".
+  phoneDigits   String?
+  phoneStatus   PhoneStatus @default(not_checked)
+  phoneLineType String?
+  phoneCarrier  String?
   location      String?
   country       String?
   city          String?
   keyword       String
   sourceUrl     String
   sourceType    String      @default("search_result")
+  sourceGroup   String?
+  /// The public sentence that shows the poster is looking for this service.
+  intentQuote   String?
   description   String?
   contactPageUrl String?
   linkedinUrl   String?
@@ -123,6 +148,9 @@ model Lead {
   @@index([userId, leadScore])
   @@index([userId, leadStatus])
   @@index([userId, keyword])
+  @@index([userId, sourceType])
+  @@index([phone])
+  @@index([phoneDigits])
   @@index([email])
   @@index([websiteKey])
 }

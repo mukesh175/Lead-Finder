@@ -12,7 +12,7 @@ import { useToast } from "@/components/Toast";
 
 const MAX_BATCHES = 200; // Safety stop so a stuck job cannot loop forever.
 
-export default function FindLeadsClient({ provider, budget, savedKeywords, defaults }) {
+export default function FindLeadsClient({ provider, budget, sourceGroups, savedKeywords, defaults }) {
   const router = useRouter();
   const toast = useToast();
   const [search, setSearch] = useState(null);
@@ -125,6 +125,7 @@ export default function FindLeadsClient({ provider, budget, savedKeywords, defau
 
       <SearchForm
         defaults={prefill}
+        sourceGroups={sourceGroups}
         disabled={running || budgetSpent}
         busyLabel={running ? "Searching..." : "Quota reached"}
         onSubmit={start}

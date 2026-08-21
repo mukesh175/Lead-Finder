@@ -15,7 +15,7 @@ export default function Filters({ value, keywords = [], onChange, onReset }) {
           <label className="form-label small lf-muted mb-1">Search</label>
           <input
             className="form-control form-control-sm"
-            placeholder="Company, name, email"
+            placeholder="Company, name, email or phone"
             value={value.q || ""}
             onChange={(event) => set({ q: event.target.value })}
           />
@@ -88,6 +88,35 @@ export default function Filters({ value, keywords = [], onChange, onReset }) {
               <option value="not_checked">Not checked</option>
             </select>
           </div>
+        </div>
+
+        <div className="col-6 col-md-2">
+          <label className="form-label small lf-muted mb-1">Phone status</label>
+          <select
+            className="form-select form-select-sm"
+            value={value.phoneStatus || "any"}
+            onChange={(event) => set({ phoneStatus: event.target.value })}
+          >
+            <option value="any">Any</option>
+            <option value="valid">Active line</option>
+            <option value="invalid">Invalid</option>
+            <option value="unknown">Unknown</option>
+            <option value="not_checked">Not checked</option>
+          </select>
+        </div>
+
+        <div className="col-6 col-md-2">
+          <label className="form-label small lf-muted mb-1">Lead type</label>
+          <select
+            className="form-select form-select-sm"
+            value={value.sourceType || "any"}
+            onChange={(event) => set({ sourceType: event.target.value })}
+          >
+            <option value="any">All leads</option>
+            <option value="intent_post">Asked for this service</option>
+            <option value="website_analysis">Business website</option>
+            <option value="search_result">Search listing only</option>
+          </select>
         </div>
 
         <div className="col-6 col-md-2">

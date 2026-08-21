@@ -25,6 +25,8 @@ export default async function LeadsPage({ searchParams }) {
         keyword: params?.keyword || "",
         searchId: params?.searchId || "",
         minScore: params?.minScore || "",
+        sourceType: params?.sourceType || "any",
+        phoneStatus: params?.phoneStatus || "any",
       }}
     />
   );

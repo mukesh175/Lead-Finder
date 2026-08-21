@@ -1,6 +1,8 @@
 import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { providerStatus, providerBudget } from "@/lib/search/searchProvider";
+import { SOURCE_GROUPS } from "@/lib/search/intent";
+import { phoneVerificationStatus } from "@/lib/phone/verifier";
 import FindLeadsClient from "./FindLeadsClient";
 
 export const dynamic = "force-dynamic";
@@ -20,9 +22,12 @@ export default async function FindLeadsPage({ searchParams }) {
     <FindLeadsClient
       provider={providerStatus()}
       budget={await providerBudget()}
+      sourceGroups={SOURCE_GROUPS}
+      phoneProvider={phoneVerificationStatus()}
       savedKeywords={keywords.map((k) => ({ id: k.id, keyword: k.keyword, location: k.location }))}
       defaults={{
         keyword: typeof params?.keyword === "string" ? params.keyword.slice(0, 120) : "",
+        mode: params?.mode === "intent" ? "intent" : "business",
         location:
           typeof params?.location === "string"
             ? params.location.slice(0, 120)

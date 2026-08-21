@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import ScoreBadge from "./ScoreBadge";
-import { EmailStatusBadge, LEAD_STATUSES } from "./StatusBadge";
+import { EmailStatusBadge, PhoneStatusBadge, LEAD_STATUSES } from "./StatusBadge";
 
 const COLUMNS = [
   ["companyName", "Company"],
@@ -77,8 +77,13 @@ export default function LeadTable({
               </td>
               <td>
                 <Link href={`/leads/${lead.id}`} className="fw-semibold text-reset d-block lf-truncate">
-                  {lead.companyName || "Unknown company"}
+                  {lead.companyName || (lead.sourceType === "intent_post" ? "Public request" : "Unknown company")}
                 </Link>
+                {lead.intentQuote ? (
+                  <span className="badge text-bg-success-subtle text-success-emphasis">
+                    Asked for this
+                  </span>
+                ) : null}
                 {lead.website ? (
                   <span className="lf-muted small d-block lf-truncate">{lead.website}</span>
                 ) : null}
@@ -96,7 +101,18 @@ export default function LeadTable({
                   <span className="lf-muted">Not found</span>
                 )}
               </td>
-              <td className="text-nowrap">{lead.phone || <span className="lf-muted">—</span>}</td>
+              <td className="text-nowrap">
+                {lead.phone ? (
+                  <div className="d-flex flex-column">
+                    <span>{lead.phone}</span>
+                    <span className="mt-1">
+                      <PhoneStatusBadge status={lead.phoneStatus} lineType={lead.phoneLineType} />
+                    </span>
+                  </div>
+                ) : (
+                  <span className="lf-muted">—</span>
+                )}
+              </td>
               <td className="lf-truncate">{lead.location || <span className="lf-muted">—</span>}</td>
               <td className="lf-truncate">{lead.keyword}</td>
               <td>

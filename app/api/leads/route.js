@@ -3,6 +3,7 @@ import { handler, ok } from "@/lib/api";
 import { requireUser, assertSameOrigin } from "@/lib/auth";
 import { leadQuerySchema, parseOrThrow, searchParamsToObject } from "@/lib/validation/schemas";
 import { buildLeadWhere, buildLeadOrderBy } from "@/lib/leads/query";
+import { verifyPhone } from "@/lib/phone/verifier";
 
 export const runtime = "nodejs";
 
@@ -48,6 +49,33 @@ export const PATCH = handler(async (request) => {
   if (body.action === "delete") {
     const { count } = await prisma.lead.deleteMany({ where: { id: { in: ids }, userId: user.id } });
     return ok({ deleted: count, updated: 0 });
+  }
+
+  if (body.action === "verify_phone") {
+    const leads = await prisma.lead.findMany({
+      where: { id: { in: ids }, userId: user.id, phone: { not: null } },
+      select: { id: true, phone: true },
+      take: 25, // bounded: each lookup costs one API call
+    });
+
+    let checked = 0;
+    for (const lead of leads) {
+      try {
+        const result = await verifyPhone(lead.phone);
+        await prisma.lead.update({
+          where: { id: lead.id },
+          data: {
+            phoneStatus: result.status,
+            phoneLineType: result.lineType,
+            phoneCarrier: result.carrier,
+          },
+        });
+        checked += 1;
+      } catch {
+        break; // allowance exhausted or provider down - stop, keep what is done
+      }
+    }
+    return ok({ updated: checked, deleted: 0, checked });
   }
 
   if (body.action === "status" && statuses.includes(body.leadStatus)) {
