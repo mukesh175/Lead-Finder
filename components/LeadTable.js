@@ -27,6 +27,8 @@ export default function LeadTable({
   onSort,
   onStatusChange,
   onDelete,
+  onVerifyPhone,
+  verifyingId = null,
 }) {
   const allSelected = leads.length > 0 && leads.every((lead) => selected.includes(lead.id));
 
@@ -103,10 +105,23 @@ export default function LeadTable({
               </td>
               <td className="text-nowrap">
                 {lead.phone ? (
-                  <div className="d-flex flex-column">
+                  <div className="d-flex flex-column align-items-start">
                     <span>{lead.phone}</span>
-                    <span className="mt-1">
+                    <span className="mt-1 d-flex align-items-center gap-1">
                       <PhoneStatusBadge status={lead.phoneStatus} lineType={lead.phoneLineType} />
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-link p-0 text-decoration-none small"
+                        onClick={() => onVerifyPhone(lead)}
+                        disabled={verifyingId === lead.id}
+                        title="Uses one verification credit"
+                      >
+                        {verifyingId === lead.id
+                          ? "Checking..."
+                          : lead.phoneStatus === "not_checked"
+                            ? "Verify"
+                            : "Re-check"}
+                      </button>
                     </span>
                   </div>
                 ) : (

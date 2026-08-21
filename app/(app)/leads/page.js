@@ -1,5 +1,6 @@
 import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { phoneBudget } from "@/lib/phone/verifier";
 import LeadsClient from "./LeadsClient";
 
 export const dynamic = "force-dynamic";
@@ -20,6 +21,7 @@ export default async function LeadsPage({ searchParams }) {
   return (
     <LeadsClient
       keywords={grouped.map((row) => row.keyword)}
+      phoneBudget={await phoneBudget()}
       initialFilters={{
         q: params?.q || "",
         keyword: params?.keyword || "",

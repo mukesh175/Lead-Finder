@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { handler, ok, fail } from "@/lib/api";
 import { requireUser, assertSameOrigin } from "@/lib/auth";
-import { verifyPhone, phoneVerificationStatus } from "@/lib/phone/verifier";
+import { verifyPhone, phoneVerificationStatus, phoneBudget } from "@/lib/phone/verifier";
 import { rateLimit, clientKey } from "@/lib/rateLimit";
 
 export const runtime = "nodejs";
@@ -36,5 +36,9 @@ export const POST = handler(async (request, { params }) => {
     select: { id: true, phoneStatus: true, phoneLineType: true, phoneCarrier: true },
   });
 
-  return ok({ lead: updated, provider: { name: provider.name, configured: provider.configured } });
+  return ok({
+    lead: updated,
+    provider: { name: provider.name, configured: provider.configured },
+    budget: await phoneBudget(),
+  });
 });

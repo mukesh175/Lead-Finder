@@ -1,6 +1,7 @@
 import { requireUser } from "@/lib/auth";
 import { providerStatus, providerBudget } from "@/lib/search/searchProvider";
 import { verificationStatus } from "@/lib/email/verifier";
+import { phoneVerificationStatus, phoneBudget } from "@/lib/phone/verifier";
 import { limits, scoreWeights } from "@/lib/config";
 import { dailyUsage } from "@/lib/leads/pipeline";
 import SettingsClient from "./SettingsClient";
@@ -23,6 +24,7 @@ export default async function SettingsPage() {
       scoreWeights={scoreWeights}
       usage={await dailyUsage(user.id)}
       budget={await providerBudget()}
+      phone={{ status: phoneVerificationStatus(), budget: await phoneBudget() }}
     />
   );
 }

@@ -216,9 +216,19 @@ the provider supplies them. Two providers are supported, chosen with
 | Abstract   | 250 lookups/month  | `abstract` |
 | Numverify  | 100 lookups/month  | `numverify`|
 
-Lookups are **on demand** - the "Check if active" button on a lead, or "Check
-phones" on selected rows - because the free allowances are small. They are
-counted against the same spend guard as search calls, so they cannot overrun.
+Lookups are **on demand** and never run during a search, because the free
+allowances are small. Three ways to spend one:
+
+- **Verify Phone page** - type any number, from your leads or by hand, and see
+  the result, carrier, line type and country. Numbers checked in the session
+  are listed underneath.
+- **Verify / Re-check link** next to each number in the leads table.
+- **Check phones** on selected rows, bounded to 25 leads per click.
+
+Remaining credits are shown on the Verify Phone page, the leads page and in
+settings, and drop as they are spent. They are counted against the same spend
+guard as search calls, so they cannot overrun. A number that cannot be parsed
+is rejected locally without spending a credit.
 
 Scope, stated plainly: these APIs confirm the number is correctly formatted,
 allocated to a real carrier, and whether it is mobile or landline. They cannot
@@ -336,7 +346,8 @@ app/
   page.js                 landing page
   login/ register/        authentication
   (app)/                  authenticated shell (sidebar + top bar)
-    dashboard/ find-leads/ leads/ leads/[id]/ searches/ keywords/ settings/
+    dashboard/ find-leads/ leads/ leads/[id]/ verify/ searches/ keywords/
+    settings/
   api/                    REST-style route handlers
 components/               Sidebar, Topbar, SearchForm, LeadTable, Filters, ...
 lib/

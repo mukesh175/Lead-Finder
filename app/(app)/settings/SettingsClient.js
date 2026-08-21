@@ -15,7 +15,7 @@ function Status({ connected, label }) {
   );
 }
 
-export default function SettingsClient({ user, integrations, limits, scoreWeights, usage, budget }) {
+export default function SettingsClient({ user, integrations, limits, scoreWeights, usage, budget, phone }) {
   const toast = useToast();
   const [form, setForm] = useState(user);
   const [busy, setBusy] = useState(false);
@@ -119,6 +119,21 @@ export default function SettingsClient({ user, integrations, limits, scoreWeight
                 <div className="lf-muted small">{integrations.search.label}</div>
               </div>
               <Status connected={integrations.search.configured} label="Set SEARCH_API_KEY and SEARCH_ENGINE_ID" />
+            </div>
+            <div className="d-flex justify-content-between align-items-center py-2 border-bottom">
+              <div>
+                <div className="fw-semibold">Phone verification</div>
+                <div className="lf-muted small">
+                  {phone?.status?.label}
+                  {phone?.budget
+                    ? ` · ${phone.budget.remaining} of ${phone.budget.limit} lookups left`
+                    : ""}
+                </div>
+              </div>
+              <Status
+                connected={Boolean(phone?.status?.configured)}
+                label="Set PHONE_VERIFICATION_API_KEY"
+              />
             </div>
             <div className="d-flex justify-content-between align-items-center py-2">
               <div>

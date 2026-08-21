@@ -7,6 +7,7 @@ const NAV = [
   { href: "/dashboard", label: "Dashboard", icon: "▦" },
   { href: "/find-leads", label: "Find Leads", icon: "✦" },
   { href: "/leads", label: "Leads", icon: "☰" },
+  { href: "/verify", label: "Verify Phone", icon: "✆" },
   { href: "/searches", label: "Search History", icon: "⏱" },
   { href: "/keywords", label: "Keywords", icon: "#" },
   { href: "/settings", label: "Settings", icon: "⚙" },

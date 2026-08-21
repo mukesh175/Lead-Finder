@@ -3,7 +3,7 @@ import { handler, ok } from "@/lib/api";
 import { requireUser, assertSameOrigin } from "@/lib/auth";
 import { leadQuerySchema, parseOrThrow, searchParamsToObject } from "@/lib/validation/schemas";
 import { buildLeadWhere, buildLeadOrderBy } from "@/lib/leads/query";
-import { verifyPhone } from "@/lib/phone/verifier";
+import { verifyPhone, phoneBudget } from "@/lib/phone/verifier";
 
 export const runtime = "nodejs";
 
@@ -75,7 +75,7 @@ export const PATCH = handler(async (request) => {
         break; // allowance exhausted or provider down - stop, keep what is done
       }
     }
-    return ok({ updated: checked, deleted: 0, checked });
+    return ok({ updated: checked, deleted: 0, checked, budget: await phoneBudget() });
   }
 
   if (body.action === "status" && statuses.includes(body.leadStatus)) {

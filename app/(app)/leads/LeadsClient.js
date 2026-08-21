@@ -7,6 +7,7 @@ import LeadTable from "@/components/LeadTable";
 import Pagination from "@/components/Pagination";
 import EmptyState from "@/components/EmptyState";
 import ConfirmDialog from "@/components/ConfirmDialog";
+import PhoneCredits from "@/components/PhoneCredits";
 import { apiRequest } from "@/lib/clientApi";
 import { useToast } from "@/components/Toast";
 
@@ -39,7 +40,7 @@ function toQuery(filters) {
   return params.toString();
 }
 
-export default function LeadsClient({ keywords, initialFilters }) {
+export default function LeadsClient({ keywords, initialFilters, phoneBudget }) {
   const toast = useToast();
   const [filters, setFilters] = useState({ ...BASE_FILTERS, ...initialFilters });
   const [data, setData] = useState({ leads: [], pagination: { page: 1, totalPages: 1, total: 0, pageSize: 25 } });
@@ -48,6 +49,8 @@ export default function LeadsClient({ keywords, initialFilters }) {
   const [selected, setSelected] = useState([]);
   const [confirm, setConfirm] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [verifyingId, setVerifyingId] = useState(null);
+  const [credits, setCredits] = useState(phoneBudget);
 
   const query = useMemo(() => toQuery(filters), [filters]);
 
@@ -82,6 +85,27 @@ export default function LeadsClient({ keywords, initialFilters }) {
     }
   };
 
+  const verifyOne = async (lead) => {
+    setVerifyingId(lead.id);
+    try {
+      const data = await apiRequest(`/api/leads/${lead.id}/verify-phone`, { method: "POST" });
+      if (data.budget) setCredits(data.budget);
+      setData((current) => ({
+        ...current,
+        leads: current.leads.map((row) => (row.id === lead.id ? { ...row, ...data.lead } : row)),
+      }));
+      if (!data.provider.configured) {
+        toast.info("No verification provider configured - status left as Not checked.");
+      } else {
+        toast.success(`Phone reported as ${data.lead.phoneStatus.replace("_", " ")}.`);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setVerifyingId(null);
+    }
+  };
+
   const runBulk = async (action, leadStatus) => {
     if (selected.length === 0) return;
     setBusy(true);
@@ -90,6 +114,7 @@ export default function LeadsClient({ keywords, initialFilters }) {
         method: "PATCH",
         body: { ids: selected, action, leadStatus },
       });
+      if (result.budget) setCredits(result.budget);
       toast.success(
         action === "delete"
           ? `${result.deleted} lead(s) deleted.`
@@ -134,6 +159,7 @@ export default function LeadsClient({ keywords, initialFilters }) {
         subtitle="Every lead keeps the keyword that discovered it and the public source it came from."
         actions={
           <>
+            <PhoneCredits budget={credits} className="align-self-center me-1" />
             <a className="btn btn-light" href={exportUrl()}>
               Export current view
             </a>
@@ -250,6 +276,8 @@ export default function LeadsClient({ keywords, initialFilters }) {
                 }))
               }
               onStatusChange={changeStatus}
+              onVerifyPhone={verifyOne}
+              verifyingId={verifyingId}
               onDelete={(lead) =>
                 setConfirm({
                   title: "Delete this lead?",
